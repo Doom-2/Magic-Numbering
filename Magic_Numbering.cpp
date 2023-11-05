@@ -77,7 +77,7 @@ int main()
 	ifstream file;
 	ofstream outfile;
 	stringstream sstream;
-	string fname, line;
+	string fname, line = "N355";
 	int counter, incr, digit_num;
 	char apply_to_L;
 
@@ -117,8 +117,15 @@ int main()
 		// First remove leading, trailing and extra spaces from line
 		line = regex_replace(line, regex("^ +| +$|( ) +"), "$1");
 		// Find line wich contains NxxxGxx/Mxx without space and remove frame number (Nxxx) from it
-		if (line.starts_with("N") && line.substr(line.find_first_not_of("N0123456789"), 1) != " ")
-			line = line.substr(line.find_first_not_of("N0123456789"));
+		try
+		{
+			if (line.starts_with("N") && line.substr(line.find_first_not_of("N0123456789"), 1) != " ")
+				line = line.substr(line.find_first_not_of("N0123456789"));
+		}
+		catch (std::out_of_range& ex)
+		{
+			continue;
+		}
 		// Skip line if it consists only of frame number (Nxxx)
 		if (line.starts_with("N") && numWords(line) == 1) continue;
 		// Skip line if it is empty

@@ -1,0 +1,37 @@
+%
+(Machine: Waldrich Coburg)
+(CNC: Sinumerik 8MC)
+;Part:       62.144-0047.001   Rebro
+(X0 Y0 - axis of symmetry)
+N010 (Z0 - top face)
+N015 (Tool - Face mill 100mm)
+(###########################)
+N500G54 G90 G40
+N15 T01 M6
+    S300   M03
+
+  N255   
+N256 
+(Start    of   path)
+N25 Z100
+N30 G00 G17    X100 Y50
+ N00015   (One more comment)
+N35 Z10
+N40M08     
+N45   G01 G94 X150 Y100 F500
+N50
+
+N50 X200
+N005 G03 X250 Y125 I0 J25
+ G01 Y150
+N65 R030 R05-2
+  (Mill      slot     150x15)
+N70 L10016
+N75 G00 Z100
+(End of path)
+ M09
+M05
+M30
+
+  
+

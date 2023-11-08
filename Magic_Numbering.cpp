@@ -96,7 +96,8 @@ int main()
 	// Enter the input data to set the program behavior
 	cout << "**********************\n МАГИЧЕСКАЯ НУМЕРАЦИЯ\n**********************\n\n";
 	cout << "Введите полное имя файла, включая путь.\n" <<
-		"Можно использовать механизм перетаскивания Drag-and-Drop" << endl << ">";
+			"Можно использовать механизм перетаскивания Drag-and-Drop\n"
+			"Для выхода из программы нажмите Esc" << endl << endl << ">";
 	while (getline(cin, fname))
 	{
 		// Exclude double quotes from the string if they exist. Need to put correct string into open() function
@@ -164,12 +165,14 @@ int main()
 		for (string line : buff)
 			outfile << line << endl;
 		outfile.close();
+		system("CLS");
 		cout << endl << "Файл " << fname << " успешно перезаписан." << endl << endl;
 		while (cin.get() != '\n');
 		cin.clear();
 		//system("pause");
 		cout << "Введите полное имя файла, включая путь.\n" <<
-			"Можно использовать механизм перетаскивания Drag-and-Drop" << endl << ">";
+			"Можно использовать механизм перетаскивания Drag-and-Drop\n"
+			"Для выхода из программы нажмите Esc" << endl << endl << ">";
 	}
 	return 0;
 }

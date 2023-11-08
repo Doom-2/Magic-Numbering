@@ -35,11 +35,11 @@ int cin_positive_int()
 			{
 			case 1:
 			case 3:
-				cerr << "ÐÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ñ‹Ð¹ Ð²Ð²Ð¾Ð´. Ð”Ð¾Ð¿ÑƒÑÐºÐ°ÐµÑ‚ÑÑ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ñ†ÐµÐ»Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾.\n" << ">";
+				cerr << "Íåêîððåêòíûé ââîä. Äîïóñêàåòñÿ òîëüêî öåëîå ÷èñëî.\n" << ">";
 				cin.clear();
 				break;
 			case 2:
-				cerr << "ÐÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ñ‹Ð¹ Ð²Ð²Ð¾Ð´. Ð¦ÐµÐ»Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾ Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð±Ñ‹Ñ‚ÑŒ Ð¿Ð¾Ð»Ð¾Ð¶Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¼.\n" << ">";
+				cerr << "Íåêîððåêòíûé ââîä. Öåëîå ÷èñëî äîëæíî áûòü ïîëîæèòåëüíûì.\n" << ">";
 				cin.clear();
 				break;
 			default:
@@ -62,7 +62,7 @@ char cin_char_y_n() {
 		else {
 			while (cin.get() != '\n');
 			cin.clear();
-			cout << "ÐÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ñ‹Ð¹ Ð²Ð²Ð¾Ð´. Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ y Ð¸Ð»Ð¸ n." << endl << ">";
+			cout << "Íåêîððåêòíûé ââîä. Ââåäèòå y èëè n." << endl << ">";
 		}
 	}
 	return ch;
@@ -83,25 +83,38 @@ int main()
 {
 	CreateThread(NULL, 0, CheckEscape, NULL, 0, NULL);
 
-	//setlocale(LC_ALL, "Russian");
 	SetConsoleCP(1251); // set the win-cp 1251 code page in the input stream
 	SetConsoleOutputCP(1251); // set the win-cp 1251 code page in the output stream
+
+	const string GREETINGS = "Ââåäèòå ïîëíîå èìÿ ôàéëà, âêëþ÷àÿ ïóòü.\n"
+							"Ìîæíî èñïîëüçîâàòü ìåõàíèçì ïåðåòàñêèâàíèÿ Drag-and-Drop\n"
+							"Äëÿ âûõîäà èç ïðîãðàììû íàæìèòå Esc\n\n>";
+
+	const string REQUEST_N_START = "\nÂâåäèòå ñòàðòîâûé íîìåð N-ïîñëåäîâàòåëüíîñòè:\n>";
+
+	const string REQUEST_N_INCR = "\nÂâåäèòå èêðåìåíò:\n>";
+
+	const string REQUEST_NUM_DIGITS = "\nÂâåäèòå êîëè÷åñòâî ðàçðÿäîâ äëÿ íóìåðàöèè:\n"
+									"Íàïðèìåð, äëÿ âûâîäà N0026... ââåäèòå 4, äëÿ N00026..., ââåäèòå 5\n>";
+
+	const string REQUEST_L_NUM = "\nÒðåáóåòñÿ ëè íóìåðàöèÿ êàäðîâ ñ âûçîâîì ïîäïðîãðàìì, íàïðèìåð, L10016, L10000?\n"
+								"Ïîäñêàçêà: äëÿ ïîäïðîãðàììû, ââåäèòå 'n', äëÿ ãëàâíîé ïðîãðàììû - 'y'\n"
+								"Åñëè òàêèõ ñòðîê íåò, ââåäèòå ëþáîé èç ñèìâîëîâ 'y' èëè 'n' (áåç êàâû÷åê)\n"
+								"y / n ?\n>";
 	ifstream file;
 	ofstream outfile;
 	stringstream sstream;
-	string fname, line = "N355";
+	string fname, line;
 	int counter, incr, digit_num;
 	char apply_to_L;
 
 	// Enter the input data to set the program behavior
-	cout << "**********************\n ÐœÐÐ“Ð˜Ð§Ð•Ð¡ÐšÐÐ¯ ÐÐ£ÐœÐ•Ð ÐÐ¦Ð˜Ð¯\n**********************\n\n";
-	cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¿Ð¾Ð»Ð½Ð¾Ðµ Ð¸Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð°, Ð²ÐºÐ»ÑŽÑ‡Ð°Ñ Ð¿ÑƒÑ‚ÑŒ.\n" <<
-			"ÐœÐ¾Ð¶Ð½Ð¾ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ Ð¼ÐµÑ…Ð°Ð½Ð¸Ð·Ð¼ Ð¿ÐµÑ€ÐµÑ‚Ð°ÑÐºÐ¸Ð²Ð°Ð½Ð¸Ñ Drag-and-Drop\n"
-			"Ð”Ð»Ñ Ð²Ñ‹Ñ…Ð¾Ð´Ð° Ð¸Ð· Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹ Ð½Ð°Ð¶Ð¼Ð¸Ñ‚Ðµ Esc" << endl << endl << ">";
+	cout << "**********************\n ÌÀÃÈ×ÅÑÊÀß ÍÓÌÅÐÀÖÈß\n**********************\n\n";
+	cout << GREETINGS;
 	while (getline(cin, fname))
 	{
 		// Exclude double quotes from the string if they exist. Need to put correct string into open() function
-		if (fname == "") { cout << "Ð˜Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð° Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¿ÑƒÑÑ‚Ñ‹Ð¼.\n" << ">"; continue;}
+		if (fname == "") { cout << "Èìÿ ôàéëà íå ìîæåò áûòü ïóñòûì.\n" << ">"; continue;}
 		if (fname.front() == '"') {
 			fname.erase(0, 1); // erase the first character
 			fname.erase(fname.size() - 1); // erase the last character
@@ -109,24 +122,21 @@ int main()
 		file.open(fname);
 		if (!file)
 		{
-			cout << "Ð¤Ð°Ð¹Ð» Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½." << endl << ">";
+			cout << "Ôàéë íå íàéäåí." << endl << ">";
 			continue;
-			system("pause");
-			return 0;
 		}
-		cout << endl << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÑÑ‚Ð°Ñ€Ñ‚Ð¾Ð²Ñ‹Ð¹ Ð½Ð¾Ð¼ÐµÑ€ N-Ð¿Ð¾ÑÐ»ÐµÐ´Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚Ð¸:" << endl << ">";
-		counter = cin_positive_int();
-		cout << endl << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¸Ð½ÐºÑ€ÐµÐ¼ÐµÐ½Ñ‚:" << endl << ">";
-		incr = cin_positive_int();
-		cout << endl << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ñ€Ð°Ð·Ñ€ÑÐ´Ð¾Ð² Ð´Ð»Ñ Ð½ÑƒÐ¼ÐµÑ€Ð°Ñ†Ð¸Ð¸:\nÐÐ°Ð¿Ñ€Ð¸Ð¼ÐµÑ€, Ð´Ð»Ñ Ð²Ñ‹Ð²Ð¾Ð´Ð° N0026... Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ 4, Ð´Ð»Ñ N00026..., Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ 5" << endl << ">";
-		digit_num = cin_positive_int();
-		cout << endl << "Ð¢Ñ€ÐµÐ±ÑƒÐµÑ‚ÑÑ Ð»Ð¸ Ð½ÑƒÐ¼ÐµÑ€Ð°Ñ†Ð¸Ñ ÐºÐ°Ð´Ñ€Ð¾Ð² Ñ Ð²Ñ‹Ð·Ð¾Ð²Ð¾Ð¼ Ð¿Ð¾Ð´Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼, Ð½Ð°Ð¿Ñ€Ð¸Ð¼ÐµÑ€, L10016, L10000?\n" <<
-			"ÐŸÐ¾Ð´ÑÐºÐ°Ð·ÐºÐ°: Ð´Ð»Ñ Ð¿Ð¾Ð´Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹, Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ 'n', Ð´Ð»Ñ Ð³Ð»Ð°Ð²Ð½Ð¾Ð¹ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹ - 'y'\n" <<
-			"Ð•ÑÐ»Ð¸ Ñ‚Ð°ÐºÐ¸Ñ… ÑÑ‚Ñ€Ð¾Ðº Ð½ÐµÑ‚, Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð»ÑŽÐ±Ð¾Ð¹ Ð¸Ð· ÑÐ¸Ð¼Ð²Ð¾Ð»Ð¾Ð² 'y' Ð¸Ð»Ð¸ 'n' (Ð±ÐµÐ· ÐºÐ°Ð²Ñ‹Ñ‡ÐµÐº)\n" <<
-			"y / n ? " << endl << ">";
-		apply_to_L = cin_char_y_n();
 
+		// enter the input data
+		cout << REQUEST_N_START;
+		counter = cin_positive_int();
+		cout << REQUEST_N_INCR;
+		incr = cin_positive_int();
+		cout << REQUEST_NUM_DIGITS;
+		digit_num = cin_positive_int();
+		cout << REQUEST_L_NUM;
+		apply_to_L = cin_char_y_n();
 		vector<string> buff; // initialize buffer for saving data line by line
+
 		while (getline(file, line)) // to get you all the lines.
 		{
 			// First remove leading, trailing and extra spaces from line
@@ -134,19 +144,19 @@ int main()
 			// Find line wich contains NxxxGxx/Mxx without space and remove frame number (Nxxx) from it
 			try
 			{
-				if (line.starts_with("N") && line.substr(line.find_first_not_of("N0123456789"), 1) != " ")
-					line = line.substr(line.find_first_not_of("N0123456789"));
+				if (line.starts_with("N") && isdigit(line[1]) && line.substr(line.find_first_not_of("0123456789", 1), 1) != " ")
+					line = line.substr(line.find_first_not_of("0123456789", 1));
 			}
-			catch (std::out_of_range& ex)
+			catch (out_of_range& ex)
 			{
 				continue;
 			}
 			// Skip line if it consists only of frame number (Nxxx)
-			if (line.starts_with("N") && numWords(line) == 1) continue;
+			if (line.starts_with("N") && isdigit(line[1]) && numWords(line) == 1) continue;
 			// Skip line if it is empty
 			if (line.empty()) continue;
 			// Remove Nxxxx and following space from each line if it exists
-			if (line.starts_with("N")) line = line.substr(line.find_first_of(" \t") + 1);
+			if (line.starts_with("N") && isdigit(line[1])) line = line.substr(line.find_first_of(" \t") + 1);
 			// Skip line starts with '%', '(' or ';'
 			if (line.starts_with("%") || line.starts_with("(") || line.starts_with(";")) { buff.push_back(line); continue; }
 			// Skip line starts with 'L' if needed
@@ -165,14 +175,11 @@ int main()
 		for (string line : buff)
 			outfile << line << endl;
 		outfile.close();
-		system("CLS");
-		cout << endl << "Ð¤Ð°Ð¹Ð» " << fname << " ÑƒÑÐ¿ÐµÑˆÐ½Ð¾ Ð¿ÐµÑ€ÐµÐ·Ð°Ð¿Ð¸ÑÐ°Ð½." << endl << endl;
+		system("CLS"); // console cleanup
+		cout << endl << "Ôàéë " << fname << " óñïåøíî ïåðåçàïèñàí." << endl << endl;
 		while (cin.get() != '\n');
 		cin.clear();
-		//system("pause");
-		cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¿Ð¾Ð»Ð½Ð¾Ðµ Ð¸Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð°, Ð²ÐºÐ»ÑŽÑ‡Ð°Ñ Ð¿ÑƒÑ‚ÑŒ.\n" <<
-			"ÐœÐ¾Ð¶Ð½Ð¾ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ Ð¼ÐµÑ…Ð°Ð½Ð¸Ð·Ð¼ Ð¿ÐµÑ€ÐµÑ‚Ð°ÑÐºÐ¸Ð²Ð°Ð½Ð¸Ñ Drag-and-Drop\n"
-			"Ð”Ð»Ñ Ð²Ñ‹Ñ…Ð¾Ð´Ð° Ð¸Ð· Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹ Ð½Ð°Ð¶Ð¼Ð¸Ñ‚Ðµ Esc" << endl << endl << ">";
+		cout << GREETINGS;
 	}
 	return 0;
 }

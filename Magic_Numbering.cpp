@@ -87,20 +87,20 @@ int main()
 	SetConsoleOutputCP(1251); // set the win-cp 1251 code page in the output stream
 
 	const string GREETINGS = "Введите полное имя файла, включая путь.\n"
-							"Можно использовать механизм перетаскивания Drag-and-Drop\n"
-							"Для выхода из программы нажмите Esc\n\n>";
+		"Можно использовать механизм перетаскивания Drag-and-Drop\n"
+		"Для выхода из программы нажмите Esc\n\n>";
 
 	const string REQUEST_N_START = "\nВведите стартовый номер N-последовательности:\n>";
 
 	const string REQUEST_N_INCR = "\nВведите инкремент:\n>";
 
 	const string REQUEST_NUM_DIGITS = "\nВведите количество разрядов для нумерации:\n"
-									"Например, для вывода N0026... введите 4, для N00026..., введите 5\n>";
+		"Например, для вывода N0026... введите 4, для N00026..., введите 5\n>";
 
 	const string REQUEST_L_NUM = "\nТребуется ли нумерация кадров с вызовом подпрограмм, например, L10016, L10000?\n"
-								"Подсказка: для подпрограммы, введите 'n', для главной программы - 'y'\n"
-								"Если таких строк нет, введите любой из символов 'y' или 'n' (без кавычек)\n"
-								"y / n ?\n>";
+		"Подсказка: для подпрограммы, введите 'n', для главной программы - 'y'\n"
+		"Если таких строк нет, введите любой из символов 'y' или 'n' (без кавычек)\n"
+		"y / n ?\n>";
 	ifstream file;
 	ofstream outfile;
 	stringstream sstream;
@@ -157,6 +157,8 @@ int main()
 			if (line.empty()) continue;
 			// Remove Nxxxx and following space from each line if it exists
 			if (line.starts_with("N") && isdigit(line[1])) line = line.substr(line.find_first_of(" \t") + 1);
+			// Skip line if it's a label eg. 'LABEL1:', 'NO_MOVE:', etc.)
+			if (line.ends_with(":")) { buff.push_back(line); continue; }
 			// Skip line starts with '%', '(' or ';'
 			if (line.starts_with("%") || line.starts_with("(") || line.starts_with(";")) { buff.push_back(line); continue; }
 			// Skip line starts with 'L' if needed

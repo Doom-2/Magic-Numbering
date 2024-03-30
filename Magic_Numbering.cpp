@@ -268,7 +268,7 @@ int main()
 			}
 			// Skip line if it consists only of frame number (Nxxx) or ;
 			if (line.starts_with("N") && isdigit(line[1]) && numWords(line) == 1) continue;
-			if (line.starts_with(";") && numWords(line) == 1) continue;
+			if (line.starts_with(";") && line.size() == 1) continue;
 			// Skip line if it's empty
 			if (line.empty()) continue;
 			// Remove Nxxxx and following space from each line if it exists

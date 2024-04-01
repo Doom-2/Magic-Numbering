@@ -28,7 +28,7 @@ int cin_positive_int(bool mode_sel_is_active=false)
 	do {
 		try {
 			if (!(cin >> val)) throw 1;
-			if (mode_sel_is_active && cin.good() && (val <= 0 || val >4) && cin.peek() == '\n') throw 4;
+			if (mode_sel_is_active && cin.good() && val > 5 && cin.peek() == '\n') throw 4;
 			if (cin.good() && val <= 0 && cin.peek() == '\n') throw 2;
 			if (cin.peek() != '\n') throw 3;
 		}
@@ -45,7 +45,7 @@ int cin_positive_int(bool mode_sel_is_active=false)
 				cin.clear();
 				break;
 			case 4:
-				cerr << "Некорректный ввод. Введите число из диапазона 1-4.\n" << ">";
+				cerr << "Некорректный ввод. Введите число из диапазона 1-5.\n" << ">";
 				cin.clear();
 				break;
 			default:
@@ -99,24 +99,33 @@ int main()
 
 	const string DESCRIPTION = "Упорядочит последовательность кадров G-кода, уберет лишнее\n\n";
 
-	const string GREETINGS_COBURG = "Выбран режим WALDRICH COBURG.\n"
+	const string GREETINGS_COBURG = "Выбран режим WALDRICH COBURG\n"
 		"(для смены режима перезапустите программу)\n\n"
 		"Стартовый номер кадра 2\n"
 		"Приращение кадра 2\n"
 		"Количество разрядов 4\n\n";
 
-	const string GREETINGS_SKODA = "Выбран режим SKODA HCW3.\n"
+	const string GREETINGS_SKODA = "Выбран режим SKODA HCW3\n"
 		"(для смены режима перезапустите программу)\n\n"
 		"Стартовый номер кадра 5\n"
 		"Приращение кадра 5\n"
 		"Количество разрядов динамическое\n"
-		"Из программы удаляются ненужные строки\n\n";
+		"Из программы удаляются ненужные строки\n"
+		"Литерал \"SAFETY_Y = 4900\" заменяется на \"SAFETY_Y = 1500\"\n\n";
 
-	const string GREETINGS_MANUAL = "Выбран ручной режим.\n"
+	const string GREETINGS_JUARISTI = "Выбран режим JUARISTI\n"
+		"(для смены режима перезапустите программу)\n\n"
+		"Стартовый номер кадра 5\n"
+		"Приращение кадра 5\n"
+		"Количество разрядов динамическое\n"
+		"Из программы удаляются ненужные строки\n"
+		"Литерал \"G0 G153 Y3000\" заменяется на \"G0 G153 Y1500\"\n\n";
+
+	const string GREETINGS_MANUAL = "Выбран ручной режим\n"
 		"(для смены режима перезапустите программу)\n\n"
 		"Введите данные самостоятельно\n\n";
 
-	const string GREETINGS_REMOVE_N = "Выбран режим без нумерации кадров.\n"
+	const string GREETINGS_REMOVE_N = "Выбран режим без нумерации кадров\n"
 		"(для смены режима перезапустите программу)\n\n"
 		"Данные номеров кадров будут удалены\n\n";
 
@@ -127,8 +136,9 @@ int main()
 	const string SELECT_MODE = "Выберите режим:\n"
 		"1. Waldrich Coburg\n"
 		"2. Skoda HCW3\n"
-		"3. Ручной ввод\n"
-		"4. Удалить нумерацию\n\n"
+		"3. JUARISTI\n"
+		"4. Ручной ввод\n"
+		"5. Удалить нумерацию\n\n"
 		"Введите цифру и нажмите Enter\n"
 		"Для выхода нажмите Esc\n\n>";
 
@@ -150,7 +160,7 @@ int main()
 	char is_coburg_subprg = 'n';
 	bool is_extra_found{};
 
-	vector<string> extra_strings = { 	// extra words that should be excluded
+	vector<string> extra_strings_skoda = { 	// extra words for SKODA HCW3 that should be excluded
 		"Machine",
 		"AO KG",
 		"Operation",
@@ -164,6 +174,15 @@ int main()
 		"ANGLE TOLERANCE",
 		"Please set tool",
 		"**************************",
+	};
+
+	vector<string> extra_strings_juaristi = { 	// extra words for JUARISTI that should be excluded
+	"MACHINE",
+	"MOSCOW",
+	//"DELTA_X",
+	//"DELTA_Z",
+	"GOTOF N7",
+	"**************************",
 	};
 
 	cout << TITLE;
@@ -183,9 +202,12 @@ int main()
 		cout << GREETINGS_SKODA;
 		break;
 	case 3:
-		cout << GREETINGS_MANUAL;
+		cout << GREETINGS_JUARISTI;
 		break;
 	case 4:
+		cout << GREETINGS_MANUAL;
+		break;
+	case 5:
 		cout << GREETINGS_REMOVE_N;
 		break;
 
@@ -219,11 +241,12 @@ int main()
 				is_coburg_subprg = cin_char_y_n();
 				break;
 			case 2:
+			case 3:
 				counter = 5;
 				incr = 5;
 				digit_num = 0;
 				break;
-			case 3:
+			case 4:
 				cout << REQUEST_N_START;
 				counter = cin_positive_int();
 				cout << REQUEST_N_INCR;
@@ -231,7 +254,7 @@ int main()
 				cout << REQUEST_NUM_DIGITS;
 				digit_num = cin_positive_int();
 				break;
-			case 4:
+			case 5:
 				counter = 2;
 				incr = 2;
 				digit_num = 0;
@@ -250,7 +273,13 @@ int main()
 
 			// Skip the lines containing certain substrings (for Skoda HCW3)
 			if (mode == 2) {
-				for (string extra_string : extra_strings)
+				for (string extra_string : extra_strings_skoda)
+					if (line.find(extra_string) != std::string::npos) { is_extra_found = true; break; };
+				if (is_extra_found) { is_extra_found = false; continue; };
+			}
+
+			else if (mode == 3) {
+				for (string extra_string : extra_strings_juaristi)
 					if (line.find(extra_string) != std::string::npos) { is_extra_found = true; break; };
 				if (is_extra_found) { is_extra_found = false; continue; };
 			}
@@ -273,14 +302,18 @@ int main()
 			if (line.empty()) continue;
 			// Remove Nxxxx and following space from each line if it exists
 			if (line.starts_with("N") && isdigit(line[1])) line = line.substr(line.find_first_of(" \t") + 1);
+			// Replace literal "SAFETY_Y = 4900" to "SAFETY_Y = 1500" for SKODA HCW3 mode
+			if (mode == 2 && line.find("SAFETY_Y = 4900") != std::string::npos) line = "SAFETY_Y = 1500";
+			// Replace literal "G0 G153 Y3000" to "G0 G153 Y1500" for JUARISTI mode
+			if (mode == 3 && line.find("G0 G153 Y3000") != std::string::npos) line = "G0 G153 Y1500";
 			// Skip line if it's a label eg. 'LABEL1:', 'NO_MOVE:', etc.)
 			if (line.ends_with(":")) { buff.push_back(line); continue; }
 			// Skip line starting with '%', '(' or ';'
 			if (line.starts_with("%") || line.starts_with("(") || line.starts_with(";")) { buff.push_back(line); continue; }
-			// Skip line starting with "L" if it is a Coburg subprogram
+			// Skip line starting with "L" for Waldrich Coburg subprogram
 			if (is_coburg_subprg == 'y' && line.starts_with("L")) { buff.push_back(line); continue; }
 			// Add frame number to the beginning of current line
-			if (mode != 4) {
+			if (mode != 5) {
 				sstream << setfill('0') << setw(digit_num) << counter;
 				line = "N" + sstream.str() + " " + line;
 				sstream.str(""); // clear stringstream
@@ -310,9 +343,12 @@ int main()
 			cout << GREETINGS_SKODA;
 			break;
 		case 3:
-			cout << GREETINGS_MANUAL;
+			cout << GREETINGS_JUARISTI;
 			break;
 		case 4:
+			cout << GREETINGS_MANUAL;
+			break;
+		case 5:
 			cout << GREETINGS_REMOVE_N;
 			break;
 

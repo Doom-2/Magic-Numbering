@@ -297,7 +297,8 @@ int main()
 		outfile.close();
 		system("CLS"); // console cleanup
 		cout << TITLE;
-		cout << endl << "Файл " << fname << " успешно перезаписан." << endl << endl;
+		cout << endl << "Файл " << fname << " успешно перезаписан" << endl;
+		cout << string(fname.size() + 25, '^') << endl << endl;
 		switch (mode)
 		{
 		case 1:

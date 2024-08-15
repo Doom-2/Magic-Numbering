@@ -28,7 +28,7 @@ int cin_positive_int(bool mode_sel_is_active=false)
 	do {
 		try {
 			if (!(cin >> val)) throw 1;
-			if (mode_sel_is_active && cin.good() && val > 5 && cin.peek() == '\n') throw 4;
+			if (mode_sel_is_active && cin.good() && val > 6 && cin.peek() == '\n') throw 4;
 			if (cin.good() && val <= 0 && cin.peek() == '\n') throw 2;
 			if (cin.peek() != '\n') throw 3;
 		}
@@ -45,7 +45,7 @@ int cin_positive_int(bool mode_sel_is_active=false)
 				cin.clear();
 				break;
 			case 4:
-				cerr << "Некорректный ввод. Введите число из диапазона 1-5.\n" << ">";
+				cerr << "Некорректный ввод. Введите число из диапазона 1-6.\n" << ">";
 				cin.clear();
 				break;
 			default:
@@ -60,6 +60,9 @@ int cin_positive_int(bool mode_sel_is_active=false)
 	return val;
 }
 
+//asks for user input
+//checks for input of only 'y' or 'n'
+//not used in the current version
 char cin_char_y_n() {
 	char ch;
 	while (1)
@@ -99,11 +102,19 @@ int main()
 
 	const string DESCRIPTION = "Упорядочит последовательность кадров G-кода, уберет лишнее\n\n";
 
-	const string GREETINGS_COBURG = "Выбран режим WALDRICH COBURG\n"
+	const string GREETINGS_COBURG_MAIN_PRG = "Выбран режим WALDRICH COBURG основная программа\n"
 		"(для смены режима перезапустите программу)\n\n"
 		"Стартовый номер кадра 2\n"
 		"Приращение кадра 2\n"
-		"Количество разрядов 4\n\n";
+		"Количество разрядов 4\n"
+		"Вызов подпрограммы Lxxx нумеруется\n\n";
+
+	const string GREETINGS_COBURG_SUB_PRG = "Выбран режим WALDRICH COBURG подпрограмма\n"
+		"(для смены режима перезапустите программу)\n\n"
+		"Стартовый номер кадра 2\n"
+		"Приращение кадра 2\n"
+		"Количество разрядов 4\n"
+		"Номер подпрограммы Lxxx00 не нумеруется\n\n";
 
 	const string GREETINGS_SKODA = "Выбран режим SKODA HCW3\n"
 		"(для смены режима перезапустите программу)\n\n"
@@ -134,11 +145,12 @@ int main()
 		"Для выхода нажмите Esc\n\n>";
 
 	const string SELECT_MODE = "Выберите режим:\n"
-		"1. Waldrich Coburg\n"
-		"2. Skoda HCW3\n"
-		"3. JUARISTI\n"
-		"4. Ручной ввод\n"
-		"5. Удалить нумерацию\n\n"
+		"1. Waldrich Coburg - основная программа\n"
+		"2. Waldrich Coburg - подпрограмма\n"
+		"3. Skoda HCW3\n"
+		"4. JUARISTI\n"
+		"5. Ручной ввод\n"
+		"6. Удалить нумерацию\n\n"
 		"Введите цифру и нажмите Enter\n"
 		"Для выхода нажмите Esc\n\n>";
 
@@ -196,18 +208,21 @@ int main()
 	switch (mode)
 	{
 	case 1:
-		cout << GREETINGS_COBURG;
+		cout << GREETINGS_COBURG_MAIN_PRG;
 		break;
 	case 2:
-		cout << GREETINGS_SKODA;
+		cout << GREETINGS_COBURG_SUB_PRG;
 		break;
 	case 3:
-		cout << GREETINGS_JUARISTI;
+		cout << GREETINGS_SKODA;
 		break;
 	case 4:
-		cout << GREETINGS_MANUAL;
+		cout << GREETINGS_JUARISTI;
 		break;
 	case 5:
+		cout << GREETINGS_MANUAL;
+		break;
+	case 6:
 		cout << GREETINGS_REMOVE_N;
 		break;
 
@@ -237,16 +252,21 @@ int main()
 				counter = 2;
 				incr = 2;
 				digit_num = 4;
-				cout << REQUEST_L_NUM;
-				is_coburg_subprg = cin_char_y_n();
+				is_coburg_subprg = 'n';
 				break;
 			case 2:
+				counter = 2;
+				incr = 2;
+				digit_num = 4;
+				is_coburg_subprg = 'y';
+				break;
 			case 3:
+			case 4:
 				counter = 5;
 				incr = 5;
 				digit_num = 0;
 				break;
-			case 4:
+			case 5:
 				cout << REQUEST_N_START;
 				counter = cin_positive_int();
 				cout << REQUEST_N_INCR;
@@ -254,7 +274,7 @@ int main()
 				cout << REQUEST_NUM_DIGITS;
 				digit_num = cin_positive_int();
 				break;
-			case 5:
+			case 6:
 				counter = 2;
 				incr = 2;
 				digit_num = 0;
@@ -272,13 +292,13 @@ int main()
 			line = regex_replace(line, regex("^ +| +$|( ) +"), "$1");
 
 			// Skip the lines containing certain substrings (for Skoda HCW3)
-			if (mode == 2) {
+			if (mode == 3) {
 				for (string extra_string : extra_strings_skoda)
 					if (line.find(extra_string) != std::string::npos) { is_extra_found = true; break; };
 				if (is_extra_found) { is_extra_found = false; continue; };
 			}
 
-			else if (mode == 3) {
+			else if (mode == 4) {
 				for (string extra_string : extra_strings_juaristi)
 					if (line.find(extra_string) != std::string::npos) { is_extra_found = true; break; };
 				if (is_extra_found) { is_extra_found = false; continue; };
@@ -303,9 +323,9 @@ int main()
 			// Remove Nxxxx and following space from each line if it exists
 			if (line.starts_with("N") && isdigit(line[1])) line = line.substr(line.find_first_of(" \t") + 1);
 			// Replace literal "SAFETY_Y = 4900" to "SAFETY_Y = 1500" for SKODA HCW3 mode
-			if (mode == 2 && line.find("SAFETY_Y = 4900") != std::string::npos) line = "SAFETY_Y = 1500";
+			if (mode == 3 && line.find("SAFETY_Y = 4900") != std::string::npos) line = "SAFETY_Y = 1500";
 			// Replace literal "G0 G153 Y3000" to "G0 G153 Y1500" for JUARISTI mode
-			if (mode == 3 && line.find("G0 G153 Y3000") != std::string::npos) line = "G0 G153 Y1500";
+			if (mode == 4 && line.find("G0 G153 Y3000") != std::string::npos) line = "G0 G153 Y1500";
 			// Skip line if it's a label eg. 'LABEL1:', 'NO_MOVE:', etc.)
 			if (line.ends_with(":")) { buff.push_back(line); continue; }
 			// Skip line starting with '%', '(' or ';'
@@ -313,7 +333,7 @@ int main()
 			// Skip line starting with "L" for Waldrich Coburg subprogram
 			if (is_coburg_subprg == 'y' && line.starts_with("L")) { buff.push_back(line); continue; }
 			// Add frame number to the beginning of current line
-			if (mode != 5) {
+			if (mode != 6) {
 				sstream << setfill('0') << setw(digit_num) << counter;
 				line = "N" + sstream.str() + " " + line;
 				sstream.str(""); // clear stringstream
@@ -335,20 +355,21 @@ int main()
 		switch (mode)
 		{
 		case 1:
-			while (cin.get() != '\n');
-			cin.clear();
-			cout << GREETINGS_COBURG;
+			cout << GREETINGS_COBURG_MAIN_PRG;
 			break;
 		case 2:
-			cout << GREETINGS_SKODA;
+			cout << GREETINGS_COBURG_SUB_PRG;
 			break;
 		case 3:
-			cout << GREETINGS_JUARISTI;
+			cout << GREETINGS_SKODA;
 			break;
 		case 4:
-			cout << GREETINGS_MANUAL;
+			cout << GREETINGS_JUARISTI;
 			break;
 		case 5:
+			cout << GREETINGS_MANUAL;
+			break;
+		case 6:
 			cout << GREETINGS_REMOVE_N;
 			break;
 

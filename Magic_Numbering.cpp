@@ -90,7 +90,8 @@ int numWords(string str)
 	return counting;
 }
 
-string RemoveWordFromLine(const string& line, string word)
+//Removes a word from the string and returns a copy of the target string
+string RemoveWordFromLine(string& line, string word)
 {
 	// \s* : extra optional spaces at the start
 	// \b : word boundary
@@ -132,7 +133,7 @@ int main()
 		"Количество разрядов динамическое\n"
 		"Из программы удаляются:\n"
 		"- ненужные строки\n"
-		"- повторяющиеся G54\n"
+		"- повторяющиеся G54 и M08\n"
 		"- RECALC_B, TRAORI и опасное перемещение после этих команд\n"
 		"Литерал \"SAFETY_Y = 4900\" заменяется на \"SAFETY_Y = 1500\"\n\n";
 
@@ -350,10 +351,7 @@ int main()
 				if (line.find("G54 G17") != string::npos && isG54Found) continue;
 				if (line.find("G54 G17") != string::npos && !isG54Found) isG54Found = true;
 				if (line.find("G54 D1") != string::npos) line = "D1";
-				if (line.find("M08") != string::npos && isM08Found) {
-					string word = "M08";
-					line = regex_replace(line, regex("\\s*\\b" + word + "\\b"), "");
-				}
+				if (line.find("M08") != string::npos && isM08Found)	line = RemoveWordFromLine(line, "M08");
 				if (line.find("M08") != string::npos && !isM08Found) isM08Found = true;
 			}
 			// Replace literal "G0 G153 Y3000" to "G0 G153 Y1500" for JUARISTI mode

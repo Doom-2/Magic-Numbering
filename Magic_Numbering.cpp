@@ -78,15 +78,24 @@ char cin_char_y_n() {
 	return ch;
 }
 
-int numWords(string wordnum)
+//Counts the number of words in string
+int numWords(string str)
 {
 	int counting = 0;
 	string word;
-	stringstream strm(wordnum);
+	stringstream strm(str);
 
 	while (strm >> word)
 		++counting;
 	return counting;
+}
+
+string RemoveWordFromLine(const string& line, string word)
+{
+	// \s* : extra optional spaces at the start
+	// \b : word boundary
+	regex reg("\\s*\\b" + word + "\\b");
+	return regex_replace(line, reg, "");
 }
 
 int main()
@@ -121,7 +130,10 @@ int main()
 		"Стартовый номер кадра 5\n"
 		"Приращение кадра 5\n"
 		"Количество разрядов динамическое\n"
-		"Из программы удаляются ненужные строки\n"
+		"Из программы удаляются:\n"
+		"- ненужные строки\n"
+		"- повторяющиеся G54\n"
+		"- RECALC_B, TRAORI и опасное перемещение после этих команд\n"
 		"Литерал \"SAFETY_Y = 4900\" заменяется на \"SAFETY_Y = 1500\"\n\n";
 
 	const string GREETINGS_JUARISTI = "Выбран режим JUARISTI\n"
@@ -169,10 +181,11 @@ int main()
 	stringstream sstream;
 	string fname, line;
 	int counter, incr, digit_num, mode=0;
-	char is_coburg_subprg = 'n';
-	bool is_extra_found{};
+	char isCoburgSubprg = 'n';
+	bool isExtraFound{};
 
 	vector<string> extra_strings_skoda = { 	// extra words for SKODA HCW3 that should be excluded
+		"Program:",
 		"Machine",
 		"AO KG",
 		"Operation",
@@ -180,7 +193,6 @@ int main()
 		"DELTA_Z",
 		"Tool:",
 		"PRED_C800",
-		"RECALC_B",
 		"GOTOF N5",
 		"G0 G153 X4000",
 		"ANGLE TOLERANCE",
@@ -252,13 +264,13 @@ int main()
 				counter = 2;
 				incr = 2;
 				digit_num = 4;
-				is_coburg_subprg = 'n';
+				isCoburgSubprg = 'n';
 				break;
 			case 2:
 				counter = 2;
 				incr = 2;
 				digit_num = 4;
-				is_coburg_subprg = 'y';
+				isCoburgSubprg = 'y';
 				break;
 			case 3:
 			case 4:
@@ -286,22 +298,29 @@ int main()
 
 		vector<string> buff; // buffer for saving data line by line
 
+		bool isG54Found{}, isRecalcBFound{}, isTraoriFound{}, isM6Found{}, isM08Found{};
+
 		while (getline(file, line)) // to get you all the lines.
 		{
 			// First, remove leading, trailing and extra spaces from line
 			line = regex_replace(line, regex("^ +| +$|( ) +"), "$1");
 
-			// Skip the lines containing certain substrings (for Skoda HCW3)
+			// Skip lines containing certain substrings for Skoda HCW3 mode
 			if (mode == 3) {
+				if (line.find("TRAORI") != string::npos) { isTraoriFound = true; continue; }
+				if (isTraoriFound) { isTraoriFound = false; continue; };
+				if (line.find("RECALC_B") != string::npos) { isRecalcBFound = true; continue; }
+				if (isRecalcBFound) { isRecalcBFound = false; continue; };
 				for (string extra_string : extra_strings_skoda)
-					if (line.find(extra_string) != std::string::npos) { is_extra_found = true; break; };
-				if (is_extra_found) { is_extra_found = false; continue; };
+					if (line.find(extra_string) != string::npos) { isExtraFound = true; break; }
+				if (isExtraFound) { isExtraFound = false; continue; };
 			}
 
+			// Skip lines containing certain substrings for JUARISTI mode
 			else if (mode == 4) {
 				for (string extra_string : extra_strings_juaristi)
-					if (line.find(extra_string) != std::string::npos) { is_extra_found = true; break; };
-				if (is_extra_found) { is_extra_found = false; continue; };
+					if (line.find(extra_string) != string::npos) { isExtraFound = true; break; }
+				if (isExtraFound) { isExtraFound = false; continue; };
 			}
 			
 
@@ -322,8 +341,21 @@ int main()
 			if (line.empty()) continue;
 			// Remove Nxxxx and following space from each line if it exists
 			if (line.starts_with("N") && isdigit(line[1])) line = line.substr(line.find_first_of(" \t") + 1);
-			// Replace literal "SAFETY_Y = 4900" to "SAFETY_Y = 1500" for SKODA HCW3 mode
-			if (mode == 3 && line.find("SAFETY_Y = 4900") != std::string::npos) line = "SAFETY_Y = 1500";
+			// Replace some literals and delete dublicates for SKODA HCW3 mode
+			if (mode == 3) {
+				if (line.find("SAFETY_Y = 4900") != std::string::npos) line = "SAFETY_Y = 1500";
+				if (line.find("T=") != string::npos) line = ";T=\"\"";
+				if (line.find("M6") != string::npos && isM6Found) continue;
+				if (line.find("M6") != string::npos && !isM6Found) isM6Found = true;
+				if (line.find("G54 G17") != string::npos && isG54Found) continue;
+				if (line.find("G54 G17") != string::npos && !isG54Found) isG54Found = true;
+				if (line.find("G54 D1") != string::npos) line = "D1";
+				if (line.find("M08") != string::npos && isM08Found) {
+					string word = "M08";
+					line = regex_replace(line, regex("\\s*\\b" + word + "\\b"), "");
+				}
+				if (line.find("M08") != string::npos && !isM08Found) isM08Found = true;
+			}
 			// Replace literal "G0 G153 Y3000" to "G0 G153 Y1500" for JUARISTI mode
 			if (mode == 4 && line.find("G0 G153 Y3000") != std::string::npos) line = "G0 G153 Y1500";
 			// Skip line if it's a label eg. 'LABEL1:', 'NO_MOVE:', etc.)
@@ -331,13 +363,14 @@ int main()
 			// Skip line starting with '%', '(' or ';'
 			if (line.starts_with("%") || line.starts_with("(") || line.starts_with(";")) { buff.push_back(line); continue; }
 			// Skip line starting with "L" for Waldrich Coburg subprogram
-			if (is_coburg_subprg == 'y' && line.starts_with("L")) { buff.push_back(line); continue; }
+			if (isCoburgSubprg == 'y' && line.starts_with("L")) { buff.push_back(line); continue; }
 			// Add frame number to the beginning of current line
 			if (mode != 6) {
 				sstream << setfill('0') << setw(digit_num) << counter;
 				line = "N" + sstream.str() + " " + line;
 				sstream.str(""); // clear stringstream
 			}
+			
 			buff.push_back(line); // push each modified line in vector object
 			counter += incr;
 		}
